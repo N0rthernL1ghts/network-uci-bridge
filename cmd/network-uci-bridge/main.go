@@ -22,8 +22,7 @@ func main() {
 	// Initiate connection to the TCP server
 	client, err := NewClient(host+":"+port, logger)
 	if err != nil {
-		logger.Error(fmt.Sprintf("Error connecting to server: %v", err))
-		os.Exit(1)
+		logger.Fatal(fmt.Sprintf("Error connecting to the server: %v", err))
 	}
 	defer client.Close()
 
