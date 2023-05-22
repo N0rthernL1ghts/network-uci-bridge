@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine AS builder
+FROM --platform=${TARGETPLATFORM} golang:1.20-alpine AS builder
 
 RUN set -eux \
     && apk add --no-cache make fish
@@ -19,7 +19,7 @@ COPY --from=builder ["/project/network-uci-bridge/build/release/uci-bridge", "/u
 
 
 
-FROM alpine:3.18 AS final
+FROM --platform=${TARGETPLATFORM} alpine:3.18 AS final
 
 COPY --from=rootfs ["/", "/"]
 
