@@ -3,7 +3,7 @@
 PROJECT_NAME := NetworkUciBridge
 BINARY_NAME := uci-bridge
 CMD_DIR := ./cmd/network-uci-bridge
-BIN_DIR := ./bin
+BIN_DIR := ./build/release
 
 build:
 	go build -o $(BIN_DIR)/$(BINARY_NAME) $(CMD_DIR)
