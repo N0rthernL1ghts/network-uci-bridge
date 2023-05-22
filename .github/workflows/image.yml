@@ -35,14 +35,6 @@ jobs:
           username: ${{github.actor}}
           password: ${{secrets.PAT_TOKEN}}
       -
-        name: Await successful tests
-        uses: lewagon/wait-on-check-action@v1.3.1
-        with:
-          ref: ${{ github.sha }}
-          check-name: tests
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 20
-      -
         name: Build and push
         uses: docker/bake-action@v3.0.1
         with:
