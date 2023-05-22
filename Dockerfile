@@ -15,7 +15,7 @@ RUN set -eux \
 
 FROM scratch AS rootfs
 
-COPY --from=builder ["/project/network-uci-bridge/bin/uci-bridge", "/usr/local/bin/"]
+COPY --from=builder ["/project/network-uci-bridge/build/release/uci-bridge", "/usr/local/bin/"]
 
 
 
