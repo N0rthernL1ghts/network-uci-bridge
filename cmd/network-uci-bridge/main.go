@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 )
 
 func main() {
@@ -24,17 +26,33 @@ func main() {
 	if err != nil {
 		logger.Fatal(fmt.Sprintf("Error connecting to the server: %v", err))
 	}
-	defer client.Close()
+
+	// Create a channel to signal when the program is exiting
+	exitChan := make(chan os.Signal, 1)
+	signal.Notify(exitChan, os.Interrupt, syscall.SIGTERM)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go client.Listen(&wg)
 
-	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		input := scanner.Text()
-		client.Send(input)
-	}
+	// Run a separate Goroutine to handle user input
+	go func() {
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			input := scanner.Text()
+			client.Send(input)
+		}
+	}()
 
+	// Wait for the program to be terminated
+	<-exitChan
+
+	// Handle cleanup and send "quit" message
+	cleanup(client)
 	wg.Wait()
+}
+
+func cleanup(client *Client) {
+	client.Send("quit")
+	client.Close()
 }
