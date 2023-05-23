@@ -2,12 +2,11 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
-	"time"
 )
 
 func main() {
@@ -27,14 +26,15 @@ func main() {
 	if err != nil {
 		logger.Fatal(fmt.Sprintf("Error connecting to the server: %v", err))
 	}
+	defer client.Close()
 
-	// Create a channel to signal when the program is exiting
-	exitChan := make(chan os.Signal, 1)
-	signal.Notify(exitChan, os.Interrupt, syscall.SIGTERM)
+	// Create a context for cancellation
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go client.Listen(&wg)
+	// Run client.Listen with the context
+	done := make(chan struct{})
+	go client.Listen(ctx, done)
 
 	// Run a separate Goroutine to handle user input
 	go func() {
@@ -44,24 +44,22 @@ func main() {
 
 			// If input is "quit", cleanup and exit
 			if input == "quit" {
-				client.Send(input)
-				time.Sleep(1 * time.Second)
-				os.Exit(0)
+				cancel()
+				return
 			}
 
 			client.Send(input)
 		}
 	}()
 
+	// Create a channel to signal when the program is exiting
+	exitChan := make(chan os.Signal, 1)
+	signal.Notify(exitChan, os.Interrupt, syscall.SIGTERM)
+
 	// Wait for the program to be terminated
 	<-exitChan
 
 	// Handle cleanup and send "quit" message
-	cleanup(client)
-	wg.Wait()
-}
-
-func cleanup(client *Client) {
 	client.Send("quit")
-	client.Close()
+	<-done
 }

@@ -2,9 +2,9 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"net"
-	"sync"
 )
 
 type Client struct {
@@ -37,12 +37,20 @@ func (c *Client) Send(message string) {
 	}
 }
 
-func (c *Client) Listen(wg *sync.WaitGroup) {
-	defer wg.Done()
-
+func (c *Client) Listen(ctx context.Context, done chan struct{}) {
+	defer close(done)
 	scanner := bufio.NewScanner(c.conn)
-	for scanner.Scan() {
-		message := scanner.Text()
-		fmt.Println(message)
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			if scanner.Scan() {
+				message := scanner.Text()
+				fmt.Println(message)
+			} else {
+				return
+			}
+		}
 	}
 }
