@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -40,6 +41,14 @@ func main() {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			input := scanner.Text()
+
+			// If input is "quit", cleanup and exit
+			if input == "quit" {
+				client.Send(input)
+				time.Sleep(1 * time.Second)
+				os.Exit(0)
+			}
+
 			client.Send(input)
 		}
 	}()
