@@ -23,3 +23,8 @@ func (l *Logger) Fatal(msg string) {
 	l.logger.SetPrefix("FATAL: ")
 	l.logger.Fatalln(msg)
 }
+
+func (l *Logger) Info(msg string) {
+	l.logger.SetPrefix("INFO: ")
+	l.logger.Println(msg)
+}
