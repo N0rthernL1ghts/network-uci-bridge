@@ -42,8 +42,9 @@ func main() {
 		for scanner.Scan() {
 			input := scanner.Text()
 
-			// If input is "quit", cleanup and exit
+			// If input is "quit", send quit command to the server, cleanup and exit
 			if input == "quit" {
+				client.Send(input)
 				cancel()
 				return
 			}
@@ -56,10 +57,11 @@ func main() {
 	exitChan := make(chan os.Signal, 1)
 	signal.Notify(exitChan, os.Interrupt, syscall.SIGTERM)
 
-	// Wait for the program to be terminated
-	<-exitChan
-
-	// Handle cleanup and send "quit" message
-	client.Send("quit")
+	// Wait for the program to be terminated or the done channel to be closed
+	select {
+	case <-exitChan:
+		client.Send("quit")
+	case <-done:
+	}
 	<-done
 }
