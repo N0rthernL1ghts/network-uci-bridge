@@ -1,4 +1,4 @@
-FROM --platform=${TARGETPLATFORM} golang:1.21-alpine AS builder
+FROM --platform=${TARGETPLATFORM} golang:1.24-alpine AS builder
 
 RUN set -eux \
     && apk add --no-cache make fish
