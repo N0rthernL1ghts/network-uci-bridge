@@ -19,7 +19,7 @@ COPY --from=builder ["/project/network-uci-bridge/build/release/uci-bridge", "/u
 
 
 
-FROM --platform=${TARGETPLATFORM} alpine:3.18 AS final
+FROM --platform=${TARGETPLATFORM} alpine:3.21 AS final
 
 COPY --from=rootfs ["/", "/"]
 
